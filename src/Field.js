@@ -1,11 +1,12 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, TouchableWithoutFeedback } from "react-native";
 import params from "./Parameters";
 import Mine from "./Mine";
+import Flag from "./Flag";
 
 export default props => {
 
-    const {mined, opened, nearMines, exploded} = props //Isso aqui é aquela fita de "Destructing"
+    const {mined, opened, nearMines, exploded, flagged} = props //Isso aqui é aquela fita de "Destructing"
     
     //Acima é o meio que usamos para saber o que a mina é. Seja ela aberta, fechada ou se tem minas próximas.
     //Com base nisso, abaixo aplicamos o respectivo estilo para ela.
@@ -13,7 +14,8 @@ export default props => {
 
     if (opened) styleField.push(styles.opened) //Se estiver com a propriedade field lá no "App.js", a gente coloca mais um estilo.
     if (exploded) styleField.push(styles.exploded) //Se estiver explodida, aplicamos outro estilo.
-    if (styleField.length === 1) styleField.push(styles.regular) //Esse tem que ficar por ultimo, em ultimo caso o campo vai ser padrãozinho.
+    if (flagged) styleField.push(styles.flagged, styles.regular) //Se for uma bandeira
+    if (!opened && !exploded) styleField.push(styles.regular) //Esse tem que ficar por ultimo, em ultimo caso o campo vai ser padrãozinho.
     
     //Isso é uma lógica para mudar a cor do campo com base na quantidade de minas que tem ao redor dele.
     let color = null
@@ -27,15 +29,18 @@ export default props => {
 
     //Aqui retornamos o campo em si, e vai depender das condições que ele vai estar.
     return(
-        <View style={styleField}>
-            {!mined && opened && nearMines > 0 ? //Condição
-                <Text style={[styles.label, {color: color}]}>
-                    {nearMines} 
-                </Text>
-            :false  //else -> false.
-        }
-            {mined && opened ? <Mine /> : false} 
-        </View>
+        <TouchableWithoutFeedback onPress={props.onOpen} onLongPress={props.onSelect}>
+            <View style={styleField}>
+                {!mined && opened && nearMines > 0 ? //Condição
+                    <Text style={[styles.label, {color: color}]}>
+                        {nearMines} 
+                    </Text>
+                :false  //else -> false.
+            }
+                {mined && opened ? <Mine /> : false} 
+                {flagged && !opened ? <Flag/> : false}
+            </View>
+        </TouchableWithoutFeedback>
     )
 
 }
@@ -72,5 +77,6 @@ const styles = StyleSheet.create({
     exploded:{
         backgroundColor: 'red',
         borderColor: 'red',
-    }
+    },
+
 })
